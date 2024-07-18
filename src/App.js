@@ -4,8 +4,8 @@ import AccountCRUD from './components/AccountCRUD';
 
 function App() {
     return(<>
-        {/* <UserCRUD /> */}
-        <AccountCRUD />
+        <UserCRUD />
+        {/* <AccountCRUD /> */}
     </>);
 }
 

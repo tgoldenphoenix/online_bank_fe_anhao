@@ -4,6 +4,7 @@ import Modal from 'react-bootstrap/Modal';
 
 import FormAddUser from './FormAddUser';
 import FormEditUser from './FormEditUser';
+import Pagination from './Pagination';
 
 function UserCRUD() {
   // For edit user modal pop-up START
@@ -12,6 +13,11 @@ function UserCRUD() {
   const handleShow = () => setShow(true);
   // For edit user modal pop-up END
 
+  // Pagination START
+  const [currentPage, setCurrentPage] = useState(1);
+  const [postsPerPage, setPostsPerPage] = useState(2);
+  // Pagination END
+  
   const [users, setUsers] = useState([]); // list of all User
   const [userEdit, setUserEdit] = useState({}); // user đang cần edit
 
@@ -29,6 +35,10 @@ function UserCRUD() {
     fetchAllUsers();
   }, [])
   console.log("list of users", users);
+
+  const lastPostIndex = currentPage * postsPerPage;
+  const firstPostIndex = lastPostIndex - postsPerPage;
+  const currentUsers = users.slice(firstPostIndex, lastPostIndex);
 
   //Edit user
   async function handleEdit(id) {
@@ -87,8 +97,8 @@ function UserCRUD() {
           </tr>
         </thead>
         <tbody>
-          {users && users.length > 0 ? 
-            users.map((item, index) => {
+          {currentUsers && currentUsers.length > 0 ? 
+            currentUsers.map((item, index) => {
               return (
                 <tr key={index}>
                   {/* <td>{index + 1}</td> */}
@@ -111,9 +121,15 @@ function UserCRUD() {
                 </tr>
               )
             }) : 'Loading ...'
-        }
+          }
         </tbody>
       </table>
+      <Pagination
+          totalPosts={users.length}
+          postsPerPage={postsPerPage}
+          setCurrentPage={setCurrentPage}
+          currentPage={currentPage}
+      />
       <hr />
 
       {/* Form add user START*/}
