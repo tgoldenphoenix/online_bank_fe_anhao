@@ -8,24 +8,64 @@ import FormAddAccount from './FormAddAccount';
 import FormEditAccount from './FormEditAccount';
 
 function AccountCRUD() {
-
     // For edit modal pop-up START
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
     // For edit modal pop-up END
 
+    // Pagination START
+    const [currentPage, setCurrentPage] = useState(1);
+    const [postsPerPage, setPostsPerPage] = useState(10); // số dòng muốn hiện trong 1 page
+    // Pagination END
+
     const [accounts, setAccounts] = useState([]);
     // danh sách type account
     const [accTypes, setAccTypes] = useState([]);
     const [accountEdit, setAccountEdit] = useState({});
+
+    const inputs = [
+      {
+        id: 1,
+        name: "userId",
+        type: "number",
+        placeholder: "user id",
+        errorMessage:
+        "First name should be 2-15 characters and shouldn't include any special character!",
+        label: "User ID",
+        // pattern: "^[A-Za-z0-9]{2,15}$",
+        required: true,
+      },
+      {
+        id: 2,
+        name: "accountNumber",
+        type: "text",
+        placeholder: "Account number",
+        errorMessage:
+        "Account number should be 12-16 characters and shouldn't include any special character!",
+        label: "Account number",
+        pattern: "^[A-Za-z0-9]{12,16}$",
+        required: true,
+      },
+      {
+        id: 3,
+        name: "balance",
+        type: "number",
+        placeholder: "Balance",
+        errorMessage:
+        "invalid balance",
+        label: "Balance",
+        // pattern: "[0-9]+([\.][0-9]?)?",
+        required: true,
+      },
+    ];
 
     async function fetchAllAccounts() {
         await axios.get("http://localhost:5244/api/Account")
           .then(res => {
             if (res.status === 200) {
               setAccounts(res.data)
-              
+              console.log("list of accounts", accounts);
             }
           })
           .catch(err => console.log(err))
@@ -45,7 +85,6 @@ function AccountCRUD() {
         fetchAllAccounts();
         fetchDataAccountType();
     }, [])
-    console.log("list of accounts", accounts);
 
     //Edit account
   async function handleEdit(id) {
@@ -71,14 +110,13 @@ function AccountCRUD() {
       // alert(id);
       axios.delete(`http://localhost:5244/api/Account/${id}`)
       .then(res => {
-        fetchAllAccounts();
-        if (res.status === 200) {
-          // console.log('user cần edit', res.data.data);
-          // setUserEdit(res.data.data);
-          console.log('delete account thành công');
-          // setProducts(products);
+        // console.log('res', res);
+        // fetchAllAccounts();
+        // alert('delete account thành công');
+        
+        if (res.status === 204) {
+          alert('delete account thành công');
           fetchAllAccounts();
-          // App.forceUpdate();
         }
       })
       .catch(err => console.log(err));
@@ -98,7 +136,6 @@ function AccountCRUD() {
               <th>Balance</th>
               <th>Type account ID</th>
               <th>Actions</th>
-              {/* <th>CategoryName</th> */}
             </tr>
           </thead>
           <tbody>
@@ -117,19 +154,17 @@ function AccountCRUD() {
                       <button className='btn btn-primary' onClick={()=> handleEdit(item.accountId)}>Edit</button> &nbsp;
                       <button className='btn btn-danger' onClick={()=> handleDelete(item.accountId)}>Delete</button>
                     </td>
-                    {/* <td>{item.categoryName}</td> */}
                   </tr>
                 )
               }) : 'Loading ...'
           }
-
           </tbody>
         </table>
         <hr />
 
         {/* Form add account START*/}
         {/* <button className='btn btn-primary' onClick={()=> handleEdit(item.userId)}>Add User</button> */}
-        <FormAddAccount setAccounts = {setAccounts} accTypes={accTypes}/>
+        <FormAddAccount inputs={inputs} setAccounts = {setAccounts} accTypes={accTypes}/>
         {/* Form add account END*/}
 
 
@@ -140,7 +175,7 @@ function AccountCRUD() {
           </Modal.Header>
 
           <Modal.Body>
-            <FormEditAccount accountEdit =  {accountEdit} fetchAllAccounts = {fetchAllAccounts} handleClose ={handleClose}/>
+            <FormEditAccount accounts={accounts} accTypes={accTypes} accountEdit={accountEdit} fetchAllAccounts = {fetchAllAccounts} handleClose ={handleClose} inputs={inputs}/>
           </Modal.Body>
         </Modal>
         {/* Pop-up modal edit account END */}

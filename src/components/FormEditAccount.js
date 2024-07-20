@@ -1,8 +1,9 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import FormInput from "./FormInput";
 
-function FormEditAccount({accountEdit, fetchAllAccounts, handleClose}) {
-    
+function FormEditAccount(props) {
+    let {accounts, accountEdit, fetchAllAccounts, handleClose, inputs, accTypes} = props;
     const [account, setAccount] = useState(accountEdit);
     // setProduct(props.userEdit);
     // console.log('prop trong FormEdituser', product);
@@ -31,32 +32,23 @@ function FormEditAccount({accountEdit, fetchAllAccounts, handleClose}) {
         <div className='row'>
             <form onSubmit={handleSubmit}>
 
-            <div className="mb-3 mt-3">
-                    <label htmlFor="firstName" className="form-label">User ID:</label>
-                    <input type="text" className="form-control"
-                        onChange={handleChangeInput} value={account.userId}
-                        placeholder="Enter user ID" name="userId" />
-                </div>
+                {inputs.map((input) => (
+                    <FormInput
+                        key={input.id}
+                        {...input} // input ko có 's'
+                        value={account[input.name]}
+                        onChange={handleChangeInput}
+                    />
+                ))}
 
                 <div className="mb-3 mt-3">
-                    <label htmlFor="firstName" className="form-label">Account Number:</label>
-                    <input type="text" className="form-control"
-                        onChange={handleChangeInput} value={account.accountNumber}
-                        placeholder="Enter account number" name="accountNumber" />
-                </div>
-
-                <div className="mb-3 mt-3">
-                    <label htmlFor="firstName" className="form-label">Balance:</label>
-                    <input type="number" className="form-control"
-                        onChange={handleChangeInput} value={account.balance}
-                        placeholder="Enter balance" name="balance" />
-                </div>
-
-                <div className="mb-3 mt-3">
-                    <label htmlFor="firstName" className="form-label">Type account ID:</label>
-                    <input type="text" className="form-control"
-                        onChange={handleChangeInput} value={account.typeAccountId}
-                        placeholder="Enter type account ID" name="typeAccountId" />
+                    <label htmlFor="category" className="form-label">Account type:</label>
+                    <select className="form-select" name='typeAccountId' onChange={handleChangeInput}>
+                        <option value="">--Please choose an option--</option>
+                        {accTypes.map((item, index) => {
+                            return (<option key={index} value={item.typeAccountId}>{item.type}</option>)
+                        })}
+                    </select>
                 </div>
 
                 <button type="submit" className="btn btn-primary">Submit</button> &nbsp;

@@ -1,150 +1,98 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import FormInput from "./FormInput";
+import moment from 'moment';
 
 function FormAddUser(props) {
-    // product này ko có 's', products bên App.js có 's'
-    const [product, setProduct] = useState({ 
+    let {setUsers, inputs, users} = props;
+    
+    const [user, setUser] = useState({ 
         firstName: "",
         lastName: "", 
-        userName: "", 
+        username: "", 
         email: "", 
-        dOB: "", 
+        dob: "", 
         address: "", 
         phone: "", 
         password: "",
-        pIN: "",
+        pin: "",
         role: ""
     });
 
-    const inputs = [
-        {
-            id: 1,
-            name: "firstName",
-            type: "text",
-            placeholder: "first name",
-            errorMessage:
-            "First name should be 3-16 characters and shouldn't include any special character!",
-            label: "First Name",
-            pattern: "^[A-Za-z0-9]{3,16}$",
-            required: true,
-        },
-        {
-            id: 2,
-            name: "lastName",
-            type: "text",
-            placeholder: "last name",
-            errorMessage:
-            "Last name should be 3-16 characters and shouldn't include any special character!",
-            label: "Last Name",
-            pattern: "^[A-Za-z0-9]{3,16}$",
-            required: true,
-        },
-        {
-            id: 3,
-            name: "userName",
-            type: "text",
-            placeholder: "user name",
-            errorMessage:
-            "User name should be 3-16 characters and shouldn't include any special character!",
-            label: "Username",
-            pattern: "^[A-Za-z0-9]{3,16}$",
-            required: true,
-        },
-        {
-            id: 4,
-            name: "email",
-            type: "email",
-            placeholder: "Email",
-            errorMessage: "It should be a valid email address! anhao",
-            label: "Email",
-            required: true,
-        },
-        {
-            id: 5,
-            name: "dOB",
-            type: "date",
-            placeholder: "Date of birth",
-            label: "Date of Birth",
-        },
-        {
-            id: 6,
-            name: "address",
-            type: "text",
-            placeholder: "address",
-            errorMessage:
-            "Address name should be 3-16 characters and shouldn't include any special character!",
-            label: "Address",
-            pattern: "^[A-Za-z0-9]{3,16}$",
-            required: true,
-        },
-        {
-            id: 7,
-            name: "phone",
-            type: "number",
-            placeholder: "phone",
-            errorMessage:
-            "Phone should be 3-16 characters and shouldn't include any special character!",
-            label: "Phone Number",
-            pattern: "^[A-Za-z0-9]{3,16}$",
-            required: true,
-        },
-        {
-            id: 8,
-            name: "password",
-            type: "password",
-            placeholder: "Password",
-            errorMessage:
-            "Password should be 8-20 characters and include at least 1 letter, 1 number and 1 special character!",
-            label: "Password",
-            pattern: `^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,20}$`,
-            required: true,
-        },
-        {
-            id: 9,
-            name: "pIN",
-            type: "text",
-            placeholder: "PIN",
-            errorMessage:
-            "PIN name should be 3-16 characters and shouldn't include any special character!",
-            label: "PIN code",
-            pattern: "^[A-Za-z0-9]{3,16}$",
-            required: true,
-        }
-    ];
-
-    let {setUsers} = props;
+    // Add dòng này để làm confirm password
+    inputs[8].pattern = user.password;
     
     function handleChangeInput(e){
         // let {name,value} = e.target;
         // setProduct({...product,[name]:value});
 
-        setProduct({ ...product, [e.target.name]: e.target.value });
+        setUser({ ...user, [e.target.name]: e.target.value });
+    }
+
+    // function được gọi trong handleSubmit để check age > 18 hay không
+    function validateDate(date){
+        var eighteenYearsAgo = moment().subtract(18, "years");
+        var birthday = moment(date);
+        
+        if (!birthday.isValid()) {
+            return "invalid date";   
+        }
+        else if (eighteenYearsAgo.isAfter(birthday)) {
+            return "good";    
+        }
+        else {
+            return "bad";    
+        }
     }
 
     async function handleSubmit(e){
         e.preventDefault();
 
-        if (product.role === '') {
-            alert('Please choose role');
+        if (validateDate(user.dob) === 'bad') {
+            alert('age must be greater than 18');
+            return;
         }
 
-        await axios.post("http://localhost:5244/api/User",product)
+        const phoneExisted = users.findIndex((item) => item.phone === user.phone);
+        if(phoneExisted !== -1) {
+            alert('Phone number đã tồn tại');
+            return;
+        }
+        const emailExisted = users.findIndex((item) => item.email === user.email);
+        if(emailExisted !== -1) {
+            alert('Email đã tồn tại');
+            return;
+        }
+        const usernameExisted = users.findIndex((item) => item.username === user.username);
+        if(usernameExisted !== -1) {
+            alert('Username đã tồn tại');
+            return;
+        }
+
+        if (user.role === '') {
+            alert('Please choose a role');
+            return;
+        }
+
+        // SELF-NOTE: không cần delete confirmPassword
+        // delete user.confirmPassword;
+        console.log('user chuan bi add', user);
+        await axios.post("http://localhost:5244/api/User", user)
             .then(res=>{
                 setUsers(pre=>[...pre,res.data])
                 // Reset lại các trường input trong form
-                setProduct({ 
-                    firstName: "", 
-                    lastName: "", 
-                    userName: "", 
-                    email: "", 
-                    dOB: "", 
-                    address: "", 
-                    phone: "", 
-                    password: "",
-                    pIN: "",
-                    role: ""
-                });
+                // setUser({ 
+                //     firstName: "", 
+                //     lastName: "", 
+                //     userName: "", 
+                //     email: "", 
+                //     dOB: "", 
+                //     address: "", 
+                //     phone: "", 
+                //     password: "",
+                //     pIN: "",
+                //     role: ""
+                // });
                 // console.log('add user successfully');
                 alert('Add user successfully!');
             })
@@ -160,7 +108,7 @@ function FormAddUser(props) {
                 <FormInput
                     key={input.id}
                     {...input} // input ko có 's'
-                    value={product[input.name]}
+                    value={user[input.name]}
                     onChange={handleChangeInput}
                 />
                 ))}
